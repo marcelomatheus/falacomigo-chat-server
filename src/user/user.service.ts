@@ -6,18 +6,19 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { User } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 import { PrismaService } from '@/prisma/prisma.service';
 import { CreateUserDto } from '@/user/dto/create-user.dto';
 import { UpdateUserDto } from '@/user/dto/update-user.dto';
 import { FilterUserDto } from '@/user/dto/filter-user.dto';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { UserWithoutPassword } from '@/user/types/user-without-password.type';
 
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  private excludePassword(user: User): Omit<User, 'password'> {
+  excludePassword(user: User): UserWithoutPassword {
     const { password: _password, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
@@ -70,11 +71,7 @@ export class UserService {
       where: { email },
     });
 
-    if (!user) {
-      throw new NotFoundException(`User with email '${email}' not found.`);
-    }
-
-    return this.excludePassword(user);
+    return user;
   }
 
   async findOne(id: string) {
