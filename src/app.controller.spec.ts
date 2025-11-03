@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-
+import { Response } from 'express';
 describe('AppController', () => {
   let appController: AppController;
 
@@ -15,8 +15,13 @@ describe('AppController', () => {
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+    it('should return a file', () => {
+      const res = { sendFile: jest.fn() } as unknown as Response;
+
+      appController.getHello(res);
+      expect(res['sendFile']).toHaveBeenCalledWith(
+        expect.stringContaining('index.html'),
+      );
     });
   });
 });
