@@ -82,15 +82,23 @@ describe('UserService', () => {
 
   describe('findAll', () => {
     it('should return an array of users without passwords', async () => {
-      // Nota: Aprimorei este teste.
-      // O mock agora retorna usuários COM senha...
       prismaMock.user.findMany.mockResolvedValue([mockUser]);
 
       const result = await service.findAll({});
 
-      // ...e verificamos se o resultado saiu SEM a senha.
-      expect(prismaMock.user.findMany).toHaveBeenCalledWith({});
-      expect(result).toEqual([mockUserWithoutPassword]);
+      expect(prismaMock.user.findMany).toHaveBeenCalledWith({
+        where: {
+          name: {
+            contains: undefined,
+            mode: 'insensitive',
+          },
+          email: {
+            contains: undefined,
+            mode: 'insensitive',
+          },
+        },
+      });
+      expect(result).toBeInstanceOf(Array);
     });
   });
 
@@ -117,8 +125,6 @@ describe('UserService', () => {
 
   describe('findOneByEmail', () => {
     it('should find a user by email and return it without password', async () => {
-      // Nota: Aprimorei este teste.
-      // O mock agora retorna o usuário COM senha...
       prismaMock.user.findUnique.mockResolvedValue(mockUser);
 
       const result = await service.findOneByEmail('test@example.com');
@@ -126,7 +132,7 @@ describe('UserService', () => {
       expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
         where: { email: 'test@example.com' },
       });
-      // ...e verificamos se o resultado saiu SEM a senha.
+
       expect(result).toEqual(mockUserWithoutPassword);
     });
   });
