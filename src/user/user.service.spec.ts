@@ -133,7 +133,7 @@ describe('UserService', () => {
         where: { email: 'test@example.com' },
       });
 
-      expect(result).toEqual(mockUserWithoutPassword);
+      expect(result).toEqual(mockUser);
     });
   });
 
