@@ -7,18 +7,16 @@ import { FilterUserDto } from '@/user/dto/filter-user.dto';
 
 const mockCreateUserDto: CreateUserDto = {
   email: 'test@example.com',
-  name: 'Test User',
   password: 'password123',
 };
 
 const mockUpdateUserDto: UpdateUserDto = {
-  name: 'Updated Name',
+  email: 'updated@example.com',
 };
 
 const mockUserResponse = {
   id: '1',
   email: 'test@example.com',
-  name: 'Test User',
   createdAt: new Date(),
   updatedAt: new Date(),
   lastLoginTimestamp: null,
@@ -71,7 +69,7 @@ describe('UserController', () => {
 
   describe('findAll', () => {
     it('should call userService.findAll with the correct filters', async () => {
-      const filters: FilterUserDto = { name: 'Test' };
+      const filters: FilterUserDto = { email: 'test@example.com' };
       const expectedResult = [mockUserResponse];
       service.findAll.mockResolvedValue(expectedResult);
 

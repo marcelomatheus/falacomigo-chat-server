@@ -16,7 +16,6 @@ import { CreateUserDto } from '@/user/dto/create-user.dto';
 const mockUser: User = {
   id: '1',
   email: 'test@example.com',
-  name: 'Test User',
   password: 'hashed_password_from_db',
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -27,7 +26,6 @@ const mockUser: User = {
 const mockUserWithoutPassword = {
   id: '1',
   email: 'test@example.com',
-  name: 'Test User',
   createdAt: mockUser.createdAt,
   updatedAt: mockUser.updatedAt,
   lastLoginTimestamp: null,
@@ -88,10 +86,6 @@ describe('UserService', () => {
 
       expect(prismaMock.user.findMany).toHaveBeenCalledWith({
         where: {
-          name: {
-            contains: undefined,
-            mode: 'insensitive',
-          },
           email: {
             contains: undefined,
             mode: 'insensitive',
@@ -140,7 +134,6 @@ describe('UserService', () => {
   describe('create', () => {
     const createUserDto: CreateUserDto = {
       email: 'new@example.com',
-      name: 'New User',
       password: 'raw_password123',
     };
     const hashedPassword = 'hashed_new_password';

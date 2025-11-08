@@ -54,7 +54,7 @@ export class AuthService {
   }
 
   async register(registerUserDto: RegisterUserDto) {
-    const { email, password, name } = registerUserDto;
+    const { email, password } = registerUserDto;
 
     const userAlredyExist = await this.userService.findOneByEmail(email);
 
@@ -65,7 +65,6 @@ export class AuthService {
     const newUserDto: CreateUserDto = {
       email,
       password,
-      name,
     };
 
     try {
