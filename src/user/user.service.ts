@@ -53,10 +53,6 @@ export class UserService {
   async findAll(filters: FilterUserDto) {
     const users = await this.prisma.user.findMany({
       where: {
-        name: {
-          contains: filters.name,
-          mode: 'insensitive',
-        },
         email: {
           contains: filters.email,
           mode: 'insensitive',

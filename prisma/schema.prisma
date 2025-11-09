@@ -8,12 +8,68 @@ datasource db {
 }
 
 model User {
-  id                   String   @id @default(auto()) @map("_id") @db.ObjectId
-  email                String   @unique
-  password             String
-  name                 String
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-  lastLoginTimestamp   DateTime?
+  id                    String    @id @default(auto()) @map("_id") @db.ObjectId
+  email                 String    @unique
+  password              String
+  lastLoginTimestamp    DateTime?
   confirmEmailTimestamp DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile   Profile?
+}
+
+model Profile {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  photoUrl  String?
+  userId    String  @db.ObjectId @unique
+  user      User    @relation(fields: [userId], references: [id])
+
+  messagesSent Message[]
+
+  tokensBalance Int      @default(0)
+  learningLang  String
+  learningLevel String
+  knownLanguages String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chatIds   String[] @db.ObjectId
+  chats     Chat[]   @relation(fields: [chatIds], references: [id])
+}
+
+model Chat {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  name    String?
+  isGroup Boolean  @default(false)
+
+  participantIds String[]   @db.ObjectId
+  participants   Profile[]  @relation(fields: [participantIds], references: [id])
+
+  messages Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Message {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  content String
+
+  senderId String  @db.ObjectId
+  sender   Profile @relation(fields: [senderId], references: [id])
+
+  chatId String @db.ObjectId
+  chat   Chat   @relation(fields: [chatId], references: [id])
+
+  translation           Json?
+  correctionSuggestions Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([chatId])
 }
