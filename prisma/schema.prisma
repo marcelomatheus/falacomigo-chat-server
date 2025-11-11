@@ -17,37 +17,37 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  profile   Profile?
+  profile Profile?
 }
 
 model Profile {
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  photoUrl  String?
-  userId    String  @db.ObjectId @unique
-  user      User    @relation(fields: [userId], references: [id])
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  photoUrl String?
+  userId   String  @unique @db.ObjectId
+  user     User    @relation(fields: [userId], references: [id])
 
   messagesSent Message[]
 
-  tokensBalance Int      @default(0)
-  learningLang  String
-  learningLevel String
+  tokensBalance  Int      @default(0)
+  learningLang   String
+  learningLevel  String
   knownLanguages String[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  chatIds   String[] @db.ObjectId
-  chats     Chat[]   @relation(fields: [chatIds], references: [id])
+  chatIds String[] @db.ObjectId
+  chats   Chat[]   @relation(fields: [chatIds], references: [id])
 }
 
 model Chat {
-  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  id      String  @id @default(auto()) @map("_id") @db.ObjectId
   name    String?
-  isGroup Boolean  @default(false)
+  isGroup Boolean @default(false)
 
-  participantIds String[]   @db.ObjectId
-  participants   Profile[]  @relation(fields: [participantIds], references: [id])
+  participantIds String[]  @db.ObjectId
+  participants   Profile[] @relation(fields: [participantIds], references: [id])
 
   messages Message[]
 
@@ -65,11 +65,22 @@ model Message {
   chatId String @db.ObjectId
   chat   Chat   @relation(fields: [chatId], references: [id])
 
-  translation           Json?
-  correctionSuggestions Json?
+  translation           TranslationType?
+  correctionSuggestions CorrectionSuggestions?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([chatId])
+}
+
+type CorrectionSuggestions {
+  suggestionText String
+  reason         String
+}
+
+type TranslationType {
+  originalText   String
+  translatedText String
+  targetLanguage String
 }
