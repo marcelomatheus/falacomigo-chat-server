@@ -37,11 +37,9 @@ export class ChatGateway
       socketId: client.id,
       userId: client.handshake.query.userId as string,
     });
-    console.log('Client connected:', client.handshake.query.userId as string);
   }
   handleDisconnect(client: Socket) {
     this.messages = this.messages.filter((msg) => msg.socketId !== client.id);
-    console.log('Client disconnected:', client.id);
   }
 
   @SubscribeMessage('sendMessage')
