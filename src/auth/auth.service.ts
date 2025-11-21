@@ -70,10 +70,7 @@ export class AuthService {
     try {
       const createdUser = await this.userService.create(newUserDto);
 
-      const access_token = this.generateAccessToken(createdUser);
-
       return {
-        access_token,
         user: {
           id: createdUser.id,
           email: createdUser.email,
