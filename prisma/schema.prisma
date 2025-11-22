@@ -30,14 +30,14 @@ model Profile {
   messagesSent Message[]
 
   tokensBalance  Int      @default(0)
-  learningLang   String
-  learningLevel  String
-  knownLanguages String[]
+  learningLang   String?
+  learningLevel  String?
+  knownLanguages String[] @default([])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  chatIds String[] @db.ObjectId
+  chatIds String[] @db.ObjectId @default([])
   chats   Chat[]   @relation(fields: [chatIds], references: [id])
 }
 
