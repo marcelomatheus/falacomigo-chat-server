@@ -4,7 +4,7 @@ import { IsArray, IsInt, IsOptional, IsString, Min } from 'class-validator';
 export class CreateProfileDto {
   @ApiProperty({ description: 'Display name', example: 'Maria Silva' })
   @IsString()
-  name!: string;
+  name: string;
 
   @ApiPropertyOptional({
     description: 'Photo URL',
@@ -20,7 +20,7 @@ export class CreateProfileDto {
     example: '64f1c2a1e9b1a2b3c4d5e6f1',
   })
   @IsString()
-  userId!: string;
+  userId: string;
 
   @ApiPropertyOptional({
     description: 'Initial tokens balance',
@@ -30,15 +30,17 @@ export class CreateProfileDto {
   @IsOptional()
   @IsInt()
   @Min(0)
-  tokensBalance?: number;
+  tokensBalance: number;
 
   @ApiProperty({ description: 'Learning language (ISO code)', example: 'en' })
   @IsString()
-  learningLang!: string;
+  @IsOptional()
+  learningLang?: string;
 
   @ApiProperty({ description: 'Learning level e.g. A1, B2', example: 'B1' })
   @IsString()
-  learningLevel!: string;
+  @IsOptional()
+  learningLevel?: string;
 
   @ApiPropertyOptional({
     description: 'Known languages',
