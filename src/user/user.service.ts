@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { User } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 import { PrismaService } from '@/prisma/prisma.service';
@@ -23,7 +23,9 @@ export class UserService {
     return userWithoutPassword;
   }
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto, tx?: Prisma.TransactionClient) {
+    const client = tx || this.prisma;
+
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(
       createUserDto.password,
@@ -31,7 +33,7 @@ export class UserService {
     );
 
     try {
-      const user = await this.prisma.user.create({
+      const user = await client.user.create({
         data: {
           ...createUserDto,
           password: hashedPassword,
