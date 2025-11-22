@@ -5,13 +5,16 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { FilterProfileDto } from './dto/filter-profile.dto';
 import { ProfileEntity } from './entities/profile.entity';
 import { ProfileQueryBuilder } from './auxiliary-methods/profile-query.builder';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ProfileService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(dto: CreateProfileDto): Promise<ProfileEntity> {
-    return this.prisma.profile.create({
+  async create(dto: CreateProfileDto, tx?: Prisma.TransactionClient) {
+    const client = tx || this.prisma;
+
+    return client.profile.create({
       data: dto,
     });
   }
