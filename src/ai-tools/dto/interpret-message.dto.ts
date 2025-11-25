@@ -1,7 +1,7 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
 
-export class CreateAiToolDto {
+export class InterpretMessageDto {
   @ApiProperty({
     description: 'Original message content to process',
     example: 'Eu gosto de aprender inglês.',
@@ -17,17 +17,9 @@ export class CreateAiToolDto {
   senderId!: string;
 
   @ApiProperty({
-    description: 'Chat id reference',
+    description: 'Message id reference',
     example: '64f1c2a1e9b1a2b3c4d5e6f8',
   })
   @IsString()
-  chatId!: string;
-
-  @ApiPropertyOptional({
-    description: 'Target language for translation',
-    example: 'en',
-  })
-  @IsOptional()
-  @IsString()
-  targetLang?: string;
+  messageId!: string;
 }
