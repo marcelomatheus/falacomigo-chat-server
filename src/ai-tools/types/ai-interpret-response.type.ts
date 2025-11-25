@@ -1,4 +1,4 @@
-export class AiResponseDto {
+export class AiResponseInterface {
   translation: {
     originalText: string;
     translatedText: string;

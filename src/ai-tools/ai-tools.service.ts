@@ -5,7 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InterpretMessageDto } from './dto/interpret-message.dto';
-import { AiResponseDto } from './types/ai-interpret-response.type'; // Importe a tipagem nova
+import { AiResponseInterface } from './types/ai-interpret-response.type';
 import { ProfileService } from '@/profile/profile.service';
 import { GroqService } from '@/groq/groq.service';
 import { MessageService } from '@/message/message.service';
@@ -21,7 +21,7 @@ export class AiToolsService {
 
   async interpretMessage(
     interpretMessageDto: InterpretMessageDto,
-  ): Promise<AiResponseDto> {
+  ): Promise<AiResponseInterface> {
     const { content, senderId, messageId } = interpretMessageDto;
 
     const profileData = await this.profile.findOne(senderId);
@@ -52,12 +52,12 @@ export class AiToolsService {
       throw new InternalServerErrorException('Empty response from AI Service.');
     }
 
-    let aiResponse: AiResponseDto;
+    let aiResponse: AiResponseInterface;
 
     try {
       const cleanJson = rawContent.replace(/```json|```/g, '').trim();
 
-      aiResponse = JSON.parse(cleanJson) as AiResponseDto;
+      aiResponse = JSON.parse(cleanJson) as AiResponseInterface;
     } catch (_error) {
       throw new InternalServerErrorException(
         'Failed to process AI response format.',
