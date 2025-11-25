@@ -11,6 +11,7 @@ import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { ProfileModule } from './profile/profile.module';
 import { AiToolsModule } from './ai-tools/ai-tools.module';
 import { MessageModule } from './message/message.module';
+import { GroqModule } from './groq/groq.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { MessageModule } from './message/message.module';
     ProfileModule,
     AiToolsModule,
     MessageModule,
+    GroqModule,
   ],
   controllers: [AppController],
   providers: [
