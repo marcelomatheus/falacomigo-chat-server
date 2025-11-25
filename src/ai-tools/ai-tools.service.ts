@@ -1,26 +1,78 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAiToolDto } from './dto/create-ai-tool.dto';
-import { UpdateAiToolDto } from './dto/update-ai-tool.dto';
+import {
+  Injectable,
+  ForbiddenException,
+  InternalServerErrorException,
+  BadRequestException,
+} from '@nestjs/common';
+import { InterpretMessageDto } from './dto/interpret-message.dto';
+import { AiResponseDto } from './types/ai-interpret-response.type'; // Importe a tipagem nova
+import { ProfileService } from '@/profile/profile.service';
+import { GroqService } from '@/groq/groq.service';
+import { MessageService } from '@/message/message.service';
+import { generatePrompt } from './auxiliary-methods/interpret-message-prompt';
 
 @Injectable()
 export class AiToolsService {
-  create(createAiToolDto: CreateAiToolDto) {
-    return 'This action adds a new aiTool';
-  }
+  constructor(
+    private readonly profile: ProfileService,
+    private readonly message: MessageService,
+    private readonly groq: GroqService,
+  ) {}
 
-  findAll() {
-    return `This action returns all aiTools`;
-  }
+  async interpretMessage(
+    interpretMessageDto: InterpretMessageDto,
+  ): Promise<AiResponseDto> {
+    const { content, senderId, messageId } = interpretMessageDto;
 
-  findOne(id: number) {
-    return `This action returns a #${id} aiTool`;
-  }
+    const profileData = await this.profile.findOne(senderId);
 
-  update(id: number, updateAiToolDto: UpdateAiToolDto) {
-    return `This action updates a #${id} aiTool`;
-  }
+    if (!profileData) {
+      throw new BadRequestException('Profile not found.');
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} aiTool`;
+    if (profileData.tokensBalance < 1) {
+      throw new ForbiddenException('Insufficient tokens balance.');
+    }
+
+    const targetLang = profileData.learningLang || 'en';
+    const systemPrompt = generatePrompt(targetLang);
+
+    let rawContent: string | null | undefined;
+
+    try {
+      rawContent = await this.groq.chat({
+        systemPrompt,
+        content,
+      });
+    } catch (_error) {
+      throw new InternalServerErrorException('AI Service unavailable.');
+    }
+
+    if (!rawContent) {
+      throw new InternalServerErrorException('Empty response from AI Service.');
+    }
+
+    let aiResponse: AiResponseDto;
+
+    try {
+      const cleanJson = rawContent.replace(/```json|```/g, '').trim();
+
+      aiResponse = JSON.parse(cleanJson) as AiResponseDto;
+    } catch (_error) {
+      throw new InternalServerErrorException(
+        'Failed to process AI response format.',
+      );
+    }
+
+    await this.profile.update(senderId, {
+      tokensBalance: profileData.tokensBalance - 1,
+    });
+
+    await this.message.update(messageId, {
+      translation: aiResponse.translation,
+      correctionSuggestions: aiResponse.correctionSuggestions,
+    });
+
+    return aiResponse;
   }
 }
