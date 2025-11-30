@@ -55,6 +55,14 @@ export class ProfileService {
     return profile;
   }
 
+  async findByUserId(userId: string): Promise<ProfileEntity> {
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId },
+    });
+    if (!profile) throw new NotFoundException('Profile not found for user');
+    return profile;
+  }
+
   async update(
     id: string | number,
     dto: UpdateProfileDto,
