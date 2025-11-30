@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsIn, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class FilterProfileDto {
   @ApiPropertyOptional({ description: 'Text search on name', example: 'Maria' })
@@ -30,8 +31,9 @@ export class FilterProfileDto {
 
   @ApiPropertyOptional({ description: 'Page number', default: 1, example: 1 })
   @IsOptional()
-  @IsInt()
-  @Min(1)
+  @Type(() => Number)
+  @IsInt({ message: 'Page must be an integer' })
+  @Min(1, { message: 'Page must be at least 1' })
   page?: number = 1;
 
   @ApiPropertyOptional({
@@ -40,8 +42,9 @@ export class FilterProfileDto {
     example: 10,
   })
   @IsOptional()
-  @IsInt()
-  @Min(1)
+  @Type(() => Number)
+  @IsInt({ message: 'Limit must be an integer' })
+  @Min(1, { message: 'Limit must be at least 1' })
   limit?: number = 10;
 
   @ApiPropertyOptional({
@@ -49,7 +52,9 @@ export class FilterProfileDto {
     enum: ['createdAt', 'updatedAt', 'name'],
   })
   @IsOptional()
-  @IsIn(['createdAt', 'updatedAt', 'name'])
+  @IsIn(['createdAt', 'updatedAt', 'name'], {
+    message: 'OrderBy must be one of: createdAt, updatedAt, name',
+  })
   orderBy?: 'createdAt' | 'updatedAt' | 'name' = 'createdAt';
 
   @ApiPropertyOptional({
@@ -58,6 +63,8 @@ export class FilterProfileDto {
     default: 'desc',
   })
   @IsOptional()
-  @IsIn(['asc', 'desc'])
+  @IsIn(['asc', 'desc'], {
+    message: 'OrderDirection must be either asc or desc',
+  })
   orderDirection?: 'asc' | 'desc' = 'desc';
 }
