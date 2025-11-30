@@ -37,7 +37,7 @@ model Profile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  chatIds String[] @db.ObjectId @default([])
+  chatIds String[] @default([]) @db.ObjectId
   chats   Chat[]   @relation(fields: [chatIds], references: [id])
 }
 
