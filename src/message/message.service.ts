@@ -30,11 +30,10 @@ export class MessageService {
 
     const qb = new MessageQueryBuilder();
     const where = qb.buildWhere({ search, chatId, senderId, ...rest });
-
     return this.prisma.message.findMany({
       where,
       skip: (page - 1) * limit,
-      take: limit,
+      take: 50,
       orderBy: { [orderBy]: orderDirection },
     });
   }
