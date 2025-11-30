@@ -3,7 +3,7 @@ import { Groq } from 'groq-sdk';
 
 export const GROQ_CLIENT = 'GROQ_CLIENT';
 
-export const LlamaProvider: Provider = {
+export const GroqProvider: Provider = {
   provide: GROQ_CLIENT,
 
   useFactory: () => {

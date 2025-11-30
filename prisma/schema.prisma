@@ -28,6 +28,7 @@ model Profile {
   user     User    @relation(fields: [userId], references: [id])
 
   messagesSent Message[]
+  deepCorrections DeepCorrections[]
 
   tokensBalance  Int      @default(0)
   learningLang   String?
@@ -68,11 +69,35 @@ model Message {
   translation           TranslationType?
   correctionSuggestions CorrectionSuggestions?
 
+  deepCorrections DeepCorrections[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([chatId])
 }
+
+model DeepCorrections {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+
+  profileId String  @db.ObjectId
+  profile   Profile @relation(fields: [profileId], references: [id])
+
+  messageId String  @db.ObjectId
+  message   Message @relation(fields: [messageId], references: [id])
+
+  title        String
+  explanation  String
+  example      String
+  targetLanguage String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([profileId])
+  @@index([messageId])
+}
+
 
 type CorrectionSuggestions {
   suggestionText String
