@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String    @id @default(auto()) @map("_id") @db.ObjectId
+  email                 String    @unique
+  password              String
+  lastLoginTimestamp    DateTime?
+  confirmEmailTimestamp DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile Profile?
+}
+
+model Profile {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  photoUrl String?
+  userId   String  @unique @db.ObjectId
+  user     User    @relation(fields: [userId], references: [id])
+
+  messagesSent Message[]
+
+  tokensBalance  Int      @default(0)
+  learningLang   String?
+  learningLevel  String?
+  knownLanguages String[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chatIds String[] @default([]) @db.ObjectId
+  chats   Chat[]   @relation(fields: [chatIds], references: [id])
+}
+
+model Chat {
+  id      String  @id @default(auto()) @map("_id") @db.ObjectId
+  name    String?
+  isGroup Boolean @default(false)
+
+  participantIds String[]  @db.ObjectId
+  participants   Profile[] @relation(fields: [participantIds], references: [id])
+
+  messages Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Message {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  content String
+
+  senderId String  @db.ObjectId
+  sender   Profile @relation(fields: [senderId], references: [id])
+
+  chatId String @db.ObjectId
+  chat   Chat   @relation(fields: [chatId], references: [id])
+
+  translation           TranslationType?
+  correctionSuggestions CorrectionSuggestions?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([chatId])
+}
+
+type CorrectionSuggestions {
+  suggestionText String
+  reason         String
+}
+
+type TranslationType {
+  originalText   String
+  translatedText String
+  targetLanguage String
+}

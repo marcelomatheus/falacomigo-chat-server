@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fala Comigo</title>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <h1>Fala Comigo</h1>
+  <input type="text" id="messageInput" placeholder="Type a message...">
+  <button id="sendButton">Send</button>
+  <ul id="messages"></ul>
+
+  <script>
+    const socket = io('http://localhost:8080', {
+      query: {
+        userId: 'user123'
+      }
+    });
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const messages = document.getElementById('messages');
+
+    sendButton.addEventListener('click', () => {
+      const message = messageInput.value;
+      const payload = { content: message, to: 'user255' };
+      socket.emit('sendMessage', payload);
+      messageInput.value = '';
+    });
+
+    socket.on('receiveMessage', (message) => {
+      const li = document.createElement('li');
+      li.textContent = message;
+      messages.appendChild(li);
+    });
+  </script>
+</body>
+</html>
