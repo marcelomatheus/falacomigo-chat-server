@@ -7,7 +7,7 @@ export class GroqService {
   constructor(@Inject(GROQ_CLIENT) private readonly groq: Groq) {}
 
   async chat(data: { systemPrompt: string; content: string }) {
-    const model = 'llama-3.1-8b-instant';
+    const model = 'openai/gpt-oss-20b';
 
     const { systemPrompt, content } = data;
 
