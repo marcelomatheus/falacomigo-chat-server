@@ -15,10 +15,12 @@ import { PrismaModule } from '@/prisma/prisma.module';
     PrismaModule,
     ProfileModule,
     PassportModule,
-    JwtModule.register({
+    JwtModule.registerAsync({
       global: true,
-      secret: process.env.JWT_SECRET as string,
-      signOptions: { expiresIn: '1d' },
+      useFactory: () => ({
+        secret: process.env.JWT_SECRET,
+        signOptions: { expiresIn: '1d' },
+      }),
     }),
   ],
   providers: [AuthService, JwtStrategy],
