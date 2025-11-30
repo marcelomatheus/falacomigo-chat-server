@@ -5,15 +5,15 @@ import Redis from 'ioredis';
 export class SocketStoreService {
   constructor(@Inject('REDIS_CLIENT') private readonly redis: Redis) {}
 
-  async saveSocket(userId: string, socketId: string) {
-    await this.redis.set(`socket:${userId}`, socketId, 'EX', 3600);
+  async saveSocket(profileId: string, socketId: string) {
+    await this.redis.set(`socket:${profileId}`, socketId, 'EX', 3600);
   }
 
-  async getSocket(userId: string) {
-    return this.redis.get(`socket:${userId}`);
+  async getSocket(profileId: string) {
+    return this.redis.get(`socket:${profileId}`);
   }
 
-  async removeSocket(userId: string) {
-    await this.redis.del(`socket:${userId}`);
+  async removeSocket(profileId: string) {
+    await this.redis.del(`socket:${profileId}`);
   }
 }

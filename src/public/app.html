@@ -3,37 +3,144 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fala Comigo</title>
-  <script src="/socket.io/socket.io.js"></script>
+  <title>Fala Comigo - Chat Test</title>
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .container { max-width: 800px; margin: 0 auto; }
+    .section { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+    input, button { padding: 8px; margin: 5px 0; }
+    #messages { list-style-type: none; padding: 0; height: 300px; overflow-y: auto; border: 1px solid #eee; }
+    #messages li { padding: 5px 10px; border-bottom: 1px solid #f0f0f0; }
+    .system { color: #888; font-style: italic; }
+  </style>
 </head>
 <body>
-  <h1>Fala Comigo</h1>
-  <input type="text" id="messageInput" placeholder="Type a message...">
-  <button id="sendButton">Send</button>
-  <ul id="messages"></ul>
+  <div class="container">
+    <h1>Fala Comigo Chat</h1>
+    
+    <div class="section" id="authSection">
+      <h3>1. Login</h3>
+      <input type="email" id="email" placeholder="Email" value="test@example.com">
+      <input type="password" id="password" placeholder="Password" value="password">
+      <button id="loginBtn">Login</button>
+      <div id="authStatus"></div>
+    </div>
+
+    <div class="section" id="connectSection" style="display:none;">
+      <h3>2. Connect to Chat</h3>
+      <input type="text" id="chatId" placeholder="Chat ID">
+      <button id="connectBtn">Connect Socket</button>
+      <div id="connectionStatus"></div>
+    </div>
+
+    <div class="section" id="chatSection" style="display:none;">
+      <h3>3. Chat</h3>
+      <ul id="messages"></ul>
+      <input type="text" id="messageInput" placeholder="Type a message..." style="width: 70%;">
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
 
   <script>
-    const socket = io('http://localhost:3000', {
-      query: {
-        userId: 'user255'
+    let token = '';
+    let socket = null;
+    let currentChatId = '';
+
+    const authSection = document.getElementById('authSection');
+    const connectSection = document.getElementById('connectSection');
+    const chatSection = document.getElementById('chatSection');
+    const messagesList = document.getElementById('messages');
+
+    // Login
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const response = await fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        
+        const data = await response.json();
+        if (data.access_token) {
+          token = data.access_token;
+          document.getElementById('authStatus').textContent = 'Logged in!';
+          authSection.style.display = 'none';
+          connectSection.style.display = 'block';
+        } else {
+          document.getElementById('authStatus').textContent = 'Login failed';
+        }
+      } catch (e) {
+        console.error(e);
+        document.getElementById('authStatus').textContent = 'Error logging in';
       }
     });
-    const messageInput = document.getElementById('messageInput');
-    const sendButton = document.getElementById('sendButton');
-    const messages = document.getElementById('messages');
 
-    sendButton.addEventListener('click', () => {
-      const message = messageInput.value;
-      const payload = { content: message, to: 'user123' };
-      socket.emit('sendMessage', payload);
-      messageInput.value = '';
+    // Connect
+    document.getElementById('connectBtn').addEventListener('click', () => {
+      currentChatId = document.getElementById('chatId').value;
+      
+      socket = io('http://localhost:8080', {
+        auth: {
+          token: token,
+          chatId: currentChatId
+        },
+        query: {
+          chatId: currentChatId,
+          lastMessageCreatedAt: new Date(Date.now() - 86400000).toISOString() // 24h ago
+        }
+      });
+
+      socket.on('connect', () => {
+        document.getElementById('connectionStatus').textContent = 'Connected!';
+        connectSection.style.display = 'none';
+        chatSection.style.display = 'block';
+        addMessage('System', 'Connected to server');
+      });
+
+      socket.on('disconnect', () => {
+        addMessage('System', 'Disconnected');
+      });
+
+      socket.on('connect_error', (err) => {
+        document.getElementById('connectionStatus').textContent = 'Connection Error: ' + err.message;
+      });
+
+      socket.on('newMessage', (msg) => {
+        addMessage(msg.sender?.name || msg.senderId, msg.content);
+      });
+
+      socket.on('missedMessages', (msgs) => {
+        msgs.forEach(msg => {
+          addMessage(msg.sender?.name || msg.senderId, msg.content + ' (History)');
+        });
+      });
     });
 
-    socket.on('receiveMessage', (message) => {
+    // Send
+    document.getElementById('sendBtn').addEventListener('click', () => {
+      const input = document.getElementById('messageInput');
+      const content = input.value;
+      if (!content) return;
+
+      socket.emit('sendMessage', {
+        chatId: currentChatId,
+        recipientId: '6920f64ce76caeedd1597c04',
+        content: content
+      });
+      
+      input.value = '';
+    });
+
+    function addMessage(sender, text) {
       const li = document.createElement('li');
-      li.textContent = message;
-      messages.appendChild(li);
-    });
+      li.textContent = `${sender}: ${text}`;
+      messagesList.appendChild(li);
+      messagesList.scrollTop = messagesList.scrollHeight;
+    }
   </script>
 </body>
 </html>

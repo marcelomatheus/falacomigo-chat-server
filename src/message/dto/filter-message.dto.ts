@@ -1,5 +1,13 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { Transform } from 'class-transformer';
+import {
+  IsDate,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class FilterMessageDto {
   @ApiPropertyOptional({
@@ -38,8 +46,9 @@ export class FilterMessageDto {
     example: 20,
   })
   @IsOptional()
-  @IsInt()
+  @IsString()
   @Min(1)
+  @Transform(({ value }) => parseInt(value as string, 10))
   limit?: number = 20;
 
   @ApiPropertyOptional({
@@ -60,4 +69,12 @@ export class FilterMessageDto {
   @IsOptional()
   @IsIn(['asc', 'desc'])
   orderDirection?: 'asc' | 'desc' = 'desc';
+
+  @ApiPropertyOptional({
+    description: 'Started from date (ISO string)',
+    example: '2023-01-01T00:00:00.000Z',
+  })
+  @IsOptional()
+  @IsDate()
+  gt?: Date;
 }

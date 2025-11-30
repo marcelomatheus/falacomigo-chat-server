@@ -5,20 +5,23 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { Prisma, User } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 import { PrismaService } from '@/prisma/prisma.service';
 import { CreateUserDto } from '@/user/dto/create-user.dto';
 import { UpdateUserDto } from '@/user/dto/update-user.dto';
 import { FilterUserDto } from '@/user/dto/filter-user.dto';
-import { UserWithoutPassword } from '@/user/types/user-without-password.type';
+import {
+  IUserAndProfile,
+  UserWithoutPassword,
+} from '@/user/types/user-without-password.type';
 
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  excludePassword(user: User): UserWithoutPassword {
+  excludePassword(user: IUserAndProfile): UserWithoutPassword {
     const { password: _password, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
@@ -38,9 +41,10 @@ export class UserService {
           ...createUserDto,
           password: hashedPassword,
         },
+        include: { profile: true },
       });
 
-      return this.excludePassword(user);
+      return this.excludePassword(user as IUserAndProfile);
     } catch (error) {
       if (
         error instanceof PrismaClientKnownRequestError &&
@@ -60,13 +64,17 @@ export class UserService {
           mode: 'insensitive',
         },
       },
+      include: { profile: true },
     });
-    return users.map((user) => this.excludePassword(user));
+    return users.map((user) => this.excludePassword(user as IUserAndProfile));
   }
 
   async findOneByEmail(email: string) {
     const user = await this.prisma.user.findUnique({
       where: { email },
+      include: {
+        profile: true,
+      },
     });
 
     return user;
@@ -81,7 +89,7 @@ export class UserService {
       throw new NotFoundException(`User with ID '${id}' not found.`);
     }
 
-    return this.excludePassword(user);
+    return this.excludePassword(user as IUserAndProfile);
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
@@ -97,8 +105,9 @@ export class UserService {
       const user = await this.prisma.user.update({
         where: { id },
         data: updateUserDto,
+        include: { profile: true },
       });
-      return this.excludePassword(user);
+      return this.excludePassword(user as IUserAndProfile);
     } catch (error) {
       if (
         error instanceof PrismaClientKnownRequestError &&

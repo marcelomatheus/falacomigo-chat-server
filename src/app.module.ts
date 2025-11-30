@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { BullModule } from '@nestjs/bullmq';
 import { ChatModule } from './chat/chat.module';
-// import { SocketStoreModule } from './socket-store/socket-store.module';
+import { SocketStoreModule } from './socket-store/socket-store.module';
 import { AppController } from '@/app.controller';
 import { AppService } from '@/app.service';
 import { PrismaModule } from '@/prisma/prisma.module';
@@ -15,6 +16,17 @@ import { GroqModule } from './groq/groq.module';
 
 @Module({
   imports: [
+    BullModule.forRootAsync({
+      useFactory: () => ({
+        connection: {
+          host: process.env.REDIS_HOST,
+          password: process.env.REDIS_PASSWORD,
+          port: 6379,
+          tls: {},
+        },
+      }),
+    }),
+    SocketStoreModule,
     PrismaModule,
     UserModule,
     AuthModule,
