@@ -1,2 +1,5 @@
-import { User } from '@prisma/client';
-export type UserWithoutPassword = Omit<User, 'password'>;
+import { Profile, User } from '@prisma/client';
+export interface IUserAndProfile extends User {
+  profile: Profile;
+}
+export type UserWithoutPassword = Omit<IUserAndProfile, 'password'>;
