@@ -8,4 +8,9 @@ export class AiResponseInterface {
     suggestionText: string;
     reason: string;
   };
+  deepCorrections: {
+    title: string;
+    explanation: string;
+    example: string;
+  }[];
 }

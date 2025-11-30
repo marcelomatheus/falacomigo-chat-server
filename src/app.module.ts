@@ -12,6 +12,7 @@ import { ProfileModule } from './profile/profile.module';
 import { AiToolsModule } from './ai-tools/ai-tools.module';
 import { MessageModule } from './message/message.module';
 import { GroqModule } from './groq/groq.module';
+import { DeepCorrectionsModule } from '@/deep-corrections/deep-corrections.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { GroqModule } from './groq/groq.module';
     AiToolsModule,
     MessageModule,
     GroqModule,
+    DeepCorrectionsModule,
   ],
   controllers: [AppController],
   providers: [
