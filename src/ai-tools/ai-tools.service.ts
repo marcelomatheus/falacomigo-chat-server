@@ -10,6 +10,8 @@ import { ProfileService } from '@/profile/profile.service';
 import { GroqService } from '@/groq/groq.service';
 import { MessageService } from '@/message/message.service';
 import { generatePrompt } from './auxiliary-methods/interpret-message-prompt';
+import { DeepCorrectionsService } from '@/deep-corrections/deep-corrections.service'; // Adicionado
+import { CreateDeepCorrectionsDto } from '@/deep-corrections/dto/create-deep-corrections.dto'; // Adicionado
 
 @Injectable()
 export class AiToolsService {
@@ -17,6 +19,7 @@ export class AiToolsService {
     private readonly profile: ProfileService,
     private readonly message: MessageService,
     private readonly groq: GroqService,
+    private readonly deepCorrectionsService: DeepCorrectionsService, // Adicionado
   ) {}
 
   async interpretMessage(
@@ -72,6 +75,20 @@ export class AiToolsService {
       translation: aiResponse.translation,
       correctionSuggestions: aiResponse.correctionSuggestions,
     });
+
+    if (aiResponse.deepCorrections && aiResponse.deepCorrections.length > 0) {
+      const correctionsToCreate: CreateDeepCorrectionsDto[] =
+        aiResponse.deepCorrections.map((correction) => ({
+          title: correction.title,
+          explanation: correction.explanation,
+          example: correction.example,
+          profileId: senderId,
+          messageId: messageId,
+          targetLanguage: targetLang,
+        }));
+
+      await this.deepCorrectionsService.createMany(correctionsToCreate);
+    }
 
     return aiResponse;
   }
