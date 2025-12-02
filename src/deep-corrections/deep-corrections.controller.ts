@@ -12,8 +12,8 @@ import { DeepCorrectionsService } from './deep-corrections.service';
 import { UpdateDeepCorrectionsDto } from './dto/update-deep-corrections.dto';
 import { FilterDeepCorrectionsDto } from './dto/filter-message.dto';
 
-@ApiTags('Messages')
-@Controller('messages')
+@ApiTags('Deep-corrections')
+@Controller('deep-corrections')
 export class MessageController {
   constructor(
     private readonly deepCorrectionsService: DeepCorrectionsService,
