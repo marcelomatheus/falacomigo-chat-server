@@ -21,7 +21,7 @@ export class DeepCorrectionsService {
 
   async findAll(
     filters: FilterDeepCorrectionsDto,
-  ): Promise<DeepCorrectionsEntity[]> {
+  ): Promise<{ data: DeepCorrectionsEntity[]; count: number }> {
     const {
       messageId,
       profileId,
@@ -35,21 +35,34 @@ export class DeepCorrectionsService {
     const qb = new DeepCorrectionsQueryBuilder();
     const where = qb.buildWhere({ messageId, profileId, ...rest });
 
-    return this.prisma.deepCorrections.findMany({
-      where,
-      skip: (page - 1) * limit,
-      take: limit,
-      orderBy: { [orderBy]: orderDirection },
-    });
+    const [data, count] = await Promise.all([
+      this.prisma.deepCorrections.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { [orderBy]: orderDirection },
+      }),
+
+      this.prisma.deepCorrections.count({ where }),
+    ]);
+
+    return { data, count };
   }
 
-  async findOne(id: string): Promise<DeepCorrectionsEntity> {
+  async findOne(
+    id: string,
+  ): Promise<{ data: DeepCorrectionsEntity; count: number }> {
     const deepCorrection = await this.prisma.deepCorrections.findUnique({
       where: { id },
     });
+
     if (!deepCorrection)
       throw new NotFoundException('Deep correction not found');
-    return deepCorrection;
+
+    return {
+      data: deepCorrection,
+      count: 1,
+    };
   }
 
   async update(
