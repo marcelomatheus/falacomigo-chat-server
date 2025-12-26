@@ -1,22 +1,37 @@
 services:
   server:
     container_name: falacomigo-container
+    restart: always
+    
+    networks:
+      - proxy-public
+      - default 
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.fala.rule=Host(`server.falacomigo.space`)"
+      - "traefik.http.routers.fala.entrypoints=websecure"
+      - "traefik.http.routers.fala.tls.certresolver=myresolver" 
+      - "traefik.http.services.fala.loadbalancer.server.port=8080"
+
     build:
       context: .
       dockerfile: Dockerfile
       args:
         DATABASE_URL: ${DATABASE_URL}
-    restart: always
-    ports:
-      - "8080:8080"
     environment:
-        NODE_ENV: production
-        DATABASE_URL: ${DATABASE_URL}
-        REDIS_HOST: ${REDIS_HOST}
-        JWT_SECRET: ${JWT_SECRET}
-        GROQ_API_KEY: ${GROQ_API_KEY}
-        REDIS_URL: ${REDIS_URL}
-        REDIS_PORT: 6379
-        PORT: 8080
-        REDIS_PASSWORD: ${REDIS_PASSWORD}
+      NODE_ENV: production
+      PORT: 8080
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_URL: ${REDIS_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+
     command: ["npm", "start"]
+
+
+networks:
+  proxy-public:
+    external: true
