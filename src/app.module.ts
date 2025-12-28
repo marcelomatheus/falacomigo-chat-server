@@ -21,9 +21,9 @@ import { DeepCorrectionsModule } from '@/deep-corrections/deep-corrections.modul
       useFactory: () => ({
         connection: {
           host: process.env.REDIS_HOST,
-          password: process.env.REDIS_PASSWORD,
+          password: process.env.REDIS_PASSWORD || undefined,
           port: 6379,
-          tls: {},
+          db: Number(process.env.REDIS_DB) || 0,
         },
       }),
     }),
