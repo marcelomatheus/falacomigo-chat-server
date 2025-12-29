@@ -67,6 +67,9 @@ export class AiToolsService {
       );
     }
 
+    aiResponse.translation.translatedText ??=
+      'Não há tradução disponível para esta mensagem.';
+
     await this.profile.update(senderId, {
       tokensBalance: profileData.tokensBalance - 1,
     });
