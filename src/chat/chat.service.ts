@@ -5,9 +5,9 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { FilterChatDto } from './dto/filter-chat.dto';
 import { ChatQueryBuilder } from './auxiliary-methods/chat-query.builder';
 import { ChatEntity } from './entities/chat.entity';
-
 import { CreateMessageData } from './interfaces/create-message.interface';
 import { MessageWithSender } from './interfaces/message-with-sender.interface';
+import { EncryptionService } from '@/common/security/encryption.service';
 
 type ChatListItem = ChatEntity & {
   participants: {
@@ -25,7 +25,10 @@ type ChatListItem = ChatEntity & {
 
 @Injectable()
 export class ChatService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly encryptionService: EncryptionService,
+  ) {}
 
   async create(createChatDto: CreateChatDto) {
     const uniqueParticipantIds = Array.from(
@@ -94,7 +97,12 @@ export class ChatService {
 
     return chats.map(({ messages, ...chat }) => ({
       ...chat,
-      lastMessage: messages[0] ?? null,
+      lastMessage: messages[0]
+        ? {
+            ...messages[0],
+            content: this.encryptionService.decrypt(messages[0].content),
+          }
+        : null,
     }));
   }
 
@@ -119,7 +127,12 @@ export class ChatService {
     const { messages, ...chatData } = chat;
     return {
       ...chatData,
-      lastMessage: messages[0] ?? null,
+      lastMessage: messages[0]
+        ? {
+            ...messages[0],
+            content: this.encryptionService.decrypt(messages[0].content),
+          }
+        : null,
     };
   }
 
@@ -140,7 +153,11 @@ export class ChatService {
         },
       },
     });
-    return message as unknown as MessageWithSender;
+
+    return {
+      ...message,
+      content: this.encryptionService.decrypt(message.content),
+    } as unknown as MessageWithSender;
   }
 
   async getMessagesSince(
@@ -176,7 +193,10 @@ export class ChatService {
       },
     });
 
-    return messages;
+    return messages.map((msg) => ({
+      ...msg,
+      content: this.encryptionService.decrypt(msg.content),
+    })) as unknown as MessageWithSender[];
   }
 
   async update(id: string, updateChatDto: UpdateChatDto): Promise<ChatEntity> {
@@ -199,7 +219,6 @@ export class ChatService {
     profileId: string,
     recipientId: string,
   ): Promise<{ chatId: string; isNew: boolean }> {
-    // Find existing chat between these two users
     const existingChat = await this.prisma.chat.findFirst({
       where: {
         isGroup: false,

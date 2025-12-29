@@ -14,6 +14,7 @@ import { AiToolsModule } from './ai-tools/ai-tools.module';
 import { MessageModule } from './message/message.module';
 import { GroqModule } from './groq/groq.module';
 import { DeepCorrectionsModule } from '@/deep-corrections/deep-corrections.module';
+import { EncryptionModule } from '@/common/security/encryption.module';
 
 @Module({
   imports: [
@@ -21,9 +22,9 @@ import { DeepCorrectionsModule } from '@/deep-corrections/deep-corrections.modul
       useFactory: () => ({
         connection: {
           host: process.env.REDIS_HOST,
-          password: process.env.REDIS_PASSWORD,
+          password: process.env.REDIS_PASSWORD || undefined,
           port: 6379,
-          tls: {},
+          db: Number(process.env.REDIS_DB) || 0,
         },
       }),
     }),
@@ -37,6 +38,7 @@ import { DeepCorrectionsModule } from '@/deep-corrections/deep-corrections.modul
     MessageModule,
     GroqModule,
     DeepCorrectionsModule,
+    EncryptionModule,
   ],
   controllers: [AppController],
   providers: [
