@@ -73,8 +73,8 @@ NestJS server for FalaComigo, a chat app focused on language practice with AI su
 - FRONTEND_URL (optional, defaults to http://localhost:3000 for CORS)
 - PORT (defaults to 8080)
 
-## How to run (local)
-1) Prereqs: Node 20+, npm, reachable MongoDB, reachable Redis, Groq key.
+## Run locally
+1) Prerequisites: Node 22+, npm, reachable MongoDB, reachable Redis, Groq API key.
 2) Install deps: `npm install`.
 3) Generate Prisma Client: `npm run prisma:generate`.
 4) Start in dev: `npm run start:dev` (port 8080 by default).
@@ -82,9 +82,31 @@ NestJS server for FalaComigo, a chat app focused on language practice with AI su
 6) Swagger: open http://localhost:8080/api.
 
 ## Docker
-- Set .env with DATABASE_URL, REDIS_*, JWT_SECRET, GROQ_API_KEY.
-- Run: `docker compose up --build`.
-- Traefik already set in compose for host `server.falacomigo.space` (adjust to your domain/TLS entrypoint).
+- Set `.env` with `DATABASE_URL`, `REDIS_HOST`, `REDIS_PASSWORD`, `REDIS_URL`, `JWT_SECRET`, `GROQ_API_KEY`.
+- Redis is started with append-only enabled (`--appendonly yes`) and password protection (`--requirepass`).
+- Redis persists data in `./data`.
+- The app service runs with `NODE_ENV=production`, `PORT=8080`, and `command: ["npm", "start"]`.
+- Run manually: `docker compose up -d --build`.
+- Traefik labels are configured for host `server.falacomigo.space`, entrypoint `websecure`, and certresolver `myresolver`.
+- The compose file expects an external Docker network named `proxy-public`.
+
+## CI/CD deployment (GitHub Actions)
+- Workflow file: `.github/workflows/deploy.yml`.
+- Trigger: every push to `main`.
+- Runner: `ubuntu-latest`.
+- Steps:
+  1) Checks out the repository.
+  2) Configures SSH key and `known_hosts`.
+  3) Connects to the server via SSH and runs:
+     - `cd /var/www/app`
+     - `git pull`
+     - `docker compose up -d --build`
+
+Required repository secrets:
+- `SSH_HOST`
+- `SSH_PORT`
+- `SSH_USER`
+- `SSH_PRIVATE_KEY`
 
 ## Useful scripts
 - `npm run prisma:generate` — generate Prisma client.
