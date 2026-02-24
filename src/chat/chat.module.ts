@@ -7,6 +7,7 @@ import { ChatController } from './chat.controller';
 import { PrismaModule } from '@/prisma/prisma.module';
 import { SocketStoreModule } from '@/socket-store/socket-store.module';
 import { AuthModule } from '@/auth/auth.module';
+import { EncryptionModule } from '@/common/security/encryption.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AuthModule } from '@/auth/auth.module';
     BullModule.registerQueue({
       name: 'message-queue',
     }),
+    EncryptionModule,
   ],
   controllers: [ChatController],
   providers: [ChatGateway, ChatService, ChatProcessor],

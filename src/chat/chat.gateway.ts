@@ -20,6 +20,7 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { SendMessageDto } from './dto/send-message.dto';
 import { AuthenticatedSocket } from './interfaces/authenticated-socket.interface';
 import { JwtPayload } from '@/auth/types/jwt-payload-type';
+import { EncryptionService } from '@/common/security/encryption.service';
 
 @WebSocketGateway({
   cors: {
@@ -38,6 +39,7 @@ export class ChatGateway
     private readonly socketStoreService: SocketStoreService,
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
+    private readonly encryptionService: EncryptionService,
     @InjectQueue('message-queue') private readonly messageQueue: Queue,
   ) {}
 
@@ -201,6 +203,7 @@ export class ChatGateway
         });
         return;
       }
+      const encryptedContent = this.encryptionService.encrypt(payload.content);
       const queueJob = await this.messageQueue
         .add(
           'message-job',
@@ -208,7 +211,7 @@ export class ChatGateway
             chatId,
             senderId,
             recipientId,
-            content: payload.content,
+            content: encryptedContent,
             participantIds: chat.participantIds,
             clientRequestId: payload.clientRequestId,
           },

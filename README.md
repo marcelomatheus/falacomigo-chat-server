@@ -74,7 +74,7 @@ NestJS server for FalaComigo, a chat app focused on language practice with AI su
 - PORT (defaults to 8080)
 
 ## Run locally
-1) Prerequisites: Node 20+, npm, reachable MongoDB, reachable Redis, Groq API key.
+1) Prerequisites: Node 22+, npm, reachable MongoDB, reachable Redis, Groq API key.
 2) Install deps: `npm install`.
 3) Generate Prisma Client: `npm run prisma:generate`.
 4) Start in dev: `npm run start:dev` (port 8080 by default).
