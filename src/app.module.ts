@@ -23,7 +23,6 @@ import { DeepCorrectionsModule } from '@/deep-corrections/deep-corrections.modul
           host: process.env.REDIS_HOST,
           password: process.env.REDIS_PASSWORD,
           port: 6379,
-          tls: {},
         },
       }),
     }),
