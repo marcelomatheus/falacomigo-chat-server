@@ -1,5 +1,4 @@
 services:
-
   redis:
     image: redis:alpine
     container_name: redis-fc-container
@@ -7,6 +6,7 @@ services:
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     volumes:
       - ./data:/data
+
   server:
     container_name: falacomigo-container
     restart: always
@@ -21,7 +21,7 @@ services:
       - "traefik.http.routers.fala.entrypoints=websecure"
       - "traefik.http.routers.fala.tls.certresolver=myresolver" 
       - "traefik.http.services.fala.loadbalancer.server.port=8080"
-
+      - "traefik.docker.network=proxy-public" 
     build:
       context: .
       dockerfile: Dockerfile
@@ -41,8 +41,30 @@ services:
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
 
     command: ["npm", "start"]
-
+  traefik:
+    image: traefik:v3.6
+    container_name: traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myresolver.acme.email=${LETSENCRYPT_EMAIL}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./letsencrypt:/letsencrypt" 
+    networks:
+      - proxy-public
 
 networks:
   proxy-public:
-    external: true
+    driver: bridge
