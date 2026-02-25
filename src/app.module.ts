@@ -24,6 +24,7 @@ import { EncryptionModule } from '@/common/security/encryption.module';
           host: process.env.REDIS_HOST,
           password: process.env.REDIS_PASSWORD || undefined,
           port: 6379,
+          db: Number(process.env.REDIS_DB) || 0,
         },
       }),
     }),
