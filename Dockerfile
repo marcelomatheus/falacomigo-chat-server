@@ -7,7 +7,7 @@ COPY tsconfig*.json ./
 COPY nest-cli.json ./
 ENV NODE_ENV=production
 
-RUN npm ci
+RUN npm install
 
 COPY . .
 
