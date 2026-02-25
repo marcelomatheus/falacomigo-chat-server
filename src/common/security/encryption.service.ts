@@ -23,31 +23,44 @@ export class EncryptionService {
   }
 
   encrypt(text: string): string {
-    const iv = randomBytes(this.ivLength);
-    const cipher = createCipheriv(this.algorithm, this.key, iv);
-
-    const encrypted = Buffer.concat([
-      cipher.update(text, 'utf8'),
-      cipher.final(),
-    ]);
-    const authTag = cipher.getAuthTag();
-
-    return Buffer.concat([iv, authTag, encrypted]).toString('base64');
+    if (typeof text !== 'string') {
+      throw new TypeError('Text to encrypt must be a string');
+    }
+    try {
+      const iv = randomBytes(this.ivLength);
+      const cipher = createCipheriv(this.algorithm, this.key, iv);
+      const encrypted = Buffer.concat([
+        cipher.update(text, 'utf8'),
+        cipher.final(),
+      ]);
+      const authTag = cipher.getAuthTag();
+      return Buffer.concat([iv, authTag, encrypted]).toString('base64');
+    } catch (error) {
+      throw new Error(`Encryption failed: ${(error as Error).message}`);
+    }
   }
 
   decrypt(base64Data: string): string {
-    const data = Buffer.from(base64Data, 'base64');
+    try {
+      const data = Buffer.from(base64Data, 'base64');
 
-    const iv = data.subarray(0, this.ivLength);
-    const tag = data.subarray(this.ivLength, this.ivLength + this.tagLength);
-    const encryptedText = data.subarray(this.ivLength + this.tagLength);
+      if (data.length < this.ivLength + this.tagLength) {
+        throw new Error('Data too short to be valid encrypted content');
+      }
 
-    const decipher = createDecipheriv(this.algorithm, this.key, iv);
-    decipher.setAuthTag(tag);
+      const iv = data.subarray(0, this.ivLength);
+      const tag = data.subarray(this.ivLength, this.ivLength + this.tagLength);
+      const encryptedText = data.subarray(this.ivLength + this.tagLength);
 
-    return Buffer.concat([
-      decipher.update(encryptedText),
-      decipher.final(),
-    ]).toString('utf8');
+      const decipher = createDecipheriv(this.algorithm, this.key, iv);
+      decipher.setAuthTag(tag);
+
+      return Buffer.concat([
+        decipher.update(encryptedText),
+        decipher.final(),
+      ]).toString('utf8');
+    } catch {
+      return "Mensagem indisponível.";
+    }
   }
 }

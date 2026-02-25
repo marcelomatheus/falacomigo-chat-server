@@ -67,7 +67,7 @@ export class MessageService {
   async update(id: string, dto: UpdateMessageDto): Promise<MessageEntity> {
     const data = { ...dto };
     if (data.content) {
-      data.content = this.encryptionService.decrypt(data.content);
+      data.content = this.encryptionService.encrypt(data.content);
     }
 
     const message = await this.prisma.message.update({
