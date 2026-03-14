@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { BullModule } from '@nestjs/bullmq';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ChatModule } from './chat/chat.module';
 import { SocketStoreModule } from './socket-store/socket-store.module';
 import { AppController } from '@/app.controller';
@@ -28,6 +29,12 @@ import { EncryptionModule } from '@/common/security/encryption.module';
         },
       }),
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60_000,
+        limit: 120,
+      },
+    ]),
     SocketStoreModule,
     PrismaModule,
     UserModule,
@@ -46,6 +53,10 @@ import { EncryptionModule } from '@/common/security/encryption.module';
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })
