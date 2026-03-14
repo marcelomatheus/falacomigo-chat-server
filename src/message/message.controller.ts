@@ -12,7 +12,6 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MessageService } from './message.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
-import { FilterMessageDto } from './dto/filter-message.dto';
 
 @ApiTags('Messages')
 @Controller('message')
