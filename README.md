@@ -70,6 +70,11 @@ NestJS server for FalaComigo, a chat app focused on language practice with AI su
 - REDIS_HOST, REDIS_PORT (6379), REDIS_PASSWORD, REDIS_URL
 - JWT_SECRET
 - GROQ_API_KEY
+- MAILGUN_API_KEY
+- MAILGUN_DOMAIN
+- MAILGUN_FROM (optional)
+- MAILGUN_BASE_URL (optional, default: https://api.mailgun.net)
+- RESET_PASSWORD_URL_BASE (optional, default: https://app.falacomigo.space)
 - FRONTEND_URL (optional, defaults to http://localhost:3000 for CORS)
 - PORT (defaults to 8080)
 

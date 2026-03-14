@@ -17,7 +17,29 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  profile Profile?
+  profile    Profile?
+  authTokens AuthToken[]
+}
+
+enum AuthTokenType {
+  CONFIRM_ACCOUNT
+  RESET_PASSWORD
+}
+
+model AuthToken {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String        @db.ObjectId
+  user      User          @relation(fields: [userId], references: [id])
+  type      AuthTokenType
+  tokenHash String
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, type])
+  @@index([expiresAt])
 }
 
 model Profile {
@@ -27,7 +49,7 @@ model Profile {
   userId   String  @unique @db.ObjectId
   user     User    @relation(fields: [userId], references: [id])
 
-  messagesSent Message[]
+  messagesSent    Message[]
   deepCorrections DeepCorrections[]
 
   tokensBalance  Int      @default(0)
@@ -78,7 +100,7 @@ model Message {
 }
 
 model DeepCorrections {
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
   profileId String  @db.ObjectId
   profile   Profile @relation(fields: [profileId], references: [id])
@@ -86,9 +108,9 @@ model DeepCorrections {
   messageId String  @db.ObjectId
   message   Message @relation(fields: [messageId], references: [id])
 
-  title        String
-  explanation  String
-  example      String
+  title          String
+  explanation    String
+  example        String
   targetLanguage String
 
   createdAt DateTime @default(now())
@@ -97,7 +119,6 @@ model DeepCorrections {
   @@index([profileId])
   @@index([messageId])
 }
-
 
 type CorrectionSuggestions {
   suggestionText String

@@ -19,6 +19,7 @@ import { CreateUserDto } from '@/user/dto/create-user.dto';
 import { ProfileService } from '@/profile/profile.service';
 import { CreateProfileDto } from '@/profile/dto/create-profile.dto';
 import { PrismaService } from '@/prisma/prisma.service';
+import { ConfirmAccountService } from '@/auth/confirm-account.service';
 
 @Injectable()
 export class AuthService {
@@ -27,6 +28,7 @@ export class AuthService {
     private userService: UserService,
     private profileService: ProfileService,
     private jwtService: JwtService,
+    private confirmAccountService: ConfirmAccountService,
   ) {}
 
   async login(loginUserDto: LoginUserDto) {
@@ -56,7 +58,19 @@ export class AuthService {
       !user ||
       !(await bcrypt.compare(loginUserDto.password, user.password))
     ) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Credenciais inválidas.');
+    }
+
+    if (!user.confirmEmailTimestamp) {
+      try {
+        await this.confirmAccountService.requestCode({ email: user.email });
+      } catch {
+        await Promise.resolve();
+      }
+
+      throw new UnauthorizedException(
+        'Confirme sua conta antes de fazer login.',
+      );
     }
 
     return this.userService.excludePassword(user as IUserAndProfile);
@@ -77,7 +91,7 @@ export class AuthService {
         password,
       };
 
-      return this.prisma.$transaction(async (tx) => {
+      const registerResponse = await this.prisma.$transaction(async (tx) => {
         const createdUser = await this.userService.create(newUserDto, tx);
 
         const newProfileDto: CreateProfileDto = {
@@ -92,6 +106,14 @@ export class AuthService {
           message: 'User has been created.',
         };
       });
+
+      try {
+        await this.confirmAccountService.requestCode({ email });
+      } catch {
+        await Promise.resolve();
+      }
+
+      return registerResponse;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
