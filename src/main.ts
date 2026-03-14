@@ -43,7 +43,7 @@ async function bootstrap() {
     },
     customSiteTitle: 'Fala Comigo API Documentation',
   });
-  await app.listen(process.env.PORT ?? 8080);
+  await app.listen(process.env.PORT ?? 8080, '0.0.0.0');
 }
 bootstrap().catch((err) => {
   console.error('Error during app bootstrap:', err);
